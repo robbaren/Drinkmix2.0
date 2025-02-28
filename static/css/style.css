@@ -7,14 +7,29 @@
    Borders: #333333
 =============================== */
 
+:root {
+  --bg-color: #121212;
+  --bg-secondary: #1E1E1E;
+  --text-primary: #F0F0F0;
+  --text-secondary: #B0B0B0;
+  --accent-color: #70e25a;
+  --accent-dark: #5ca044;
+  --border-color: #333333;
+  --error-color: #ff4d4d;
+  --success-color: #70e25a;
+  --warning-color: #ffbb33;
+}
+
+/* Base Styles */
 html, body {
   margin: 0;
   padding: 0;
-  background: #121212;
-  color: #F0F0F0;
+  background: var(--bg-color);
+  color: var(--text-primary);
   font-family: "SF Pro", "Helvetica Neue", Arial, sans-serif;
   width: 100%;
   height: 100%;
+  line-height: 1.5;
 }
 
 /* Constrain overall content width to 800px */
@@ -27,12 +42,15 @@ html, body {
 
 /* Header */
 .app-header {
-  background: #121212;
-  border-bottom: 1px solid #333333;
+  background: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
   padding: 10px;
   text-align: center;
   height: 60px;
   box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .app-header h1 {
@@ -44,43 +62,54 @@ html, body {
 
 /* Flash messages */
 .flash-messages {
-  background: #1E1E1E;
-  border: 1px solid #333333;
-  border-radius: 6px;
-  padding: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 15px;
   margin-bottom: 15px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .flash-messages p {
   margin: 0;
   font-size: 16px;
-  color: #F0F0F0;
+  color: var(--text-primary);
 }
 
 /* Center settings pages content and headers */
 .settings-page {
   text-align: center;
   margin: 0 auto;
-  max-width: 800px; /* or your desired width */
-  padding: 20px; /* optional: add some padding */
+  max-width: 800px;
+  padding: 20px;
 }
 
 .settings-page h1,
 .settings-page h2,
 .settings-page h3 {
   text-align: center;
+  margin-bottom: 20px;
+}
+
+.settings-page h2 {
+  margin-top: 0;
 }
 
 /* Buttons */
 .button,
 a.button {
   display: inline-block;
-  background: linear-gradient(45deg, #70e25a, #5ca044);
+  background: linear-gradient(45deg, var(--accent-color), var(--accent-dark));
   color: #FFFFFF;
   padding: 15px 20px;
   margin: 5px 0;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
@@ -97,14 +126,14 @@ a.button:hover {
 }
 
 .button:active {
-  background: linear-gradient(45deg, #5ca044, #70e25a);
+  background: linear-gradient(45deg, var(--accent-dark), var(--accent-color));
   transform: scale(0.98);
 }
 
 /* "Back" button variant */
 .back-button {
   background: #333333;
-  color: #F0F0F0;
+  color: var(--text-primary);
 }
 
 .back-button:hover {
@@ -113,12 +142,14 @@ a.button:hover {
 
 /* Links */
 a {
-  color: #70e25a;
+  color: var(--accent-color);
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 a:hover {
   text-decoration: underline;
+  color: var(--accent-dark);
 }
 
 /* Forms & Inputs */
@@ -132,21 +163,62 @@ textarea,
 select {
   width: 100%;
   max-width: 400px;
-  padding: 10px;
+  padding: 12px;
   margin: 8px 0;
-  border: 1px solid #333333;
-  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   font-size: 16px;
-  background: #1E1E1E;
-  color: #F0F0F0;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent-color);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(112, 226, 90, 0.2);
 }
 
 label {
   display: inline-block;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   font-weight: 500;
-  color: #B0B0B0;
+  color: var(--text-secondary);
+}
+
+/* Checkboxes */
+input[type="checkbox"] {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  appearance: none;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 /* Tables */
@@ -154,22 +226,26 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin: 15px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 th, td {
-  padding: 10px;
-  border: 1px solid #333333;
+  padding: 12px 15px;
+  border: 1px solid var(--border-color);
   text-align: left;
   font-size: 16px;
 }
 
 th {
-  background: #1E1E1E;
-  color: #F0F0F0;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-weight: bold;
 }
 
 table tr:nth-child(even) {
-  background: #1E1E1E;
+  background: var(--bg-secondary);
 }
 
 table tr:hover {
@@ -183,38 +259,52 @@ table tr:hover {
   display: flex;
   flex-wrap: nowrap;
   justify-content: space-between;
+  margin-bottom: 20px;
 }
 
 .hose-item {
   flex: 1;
   margin: 0 2px;
-  background: #121212;
+  background: var(--bg-color);
   border: 1px solid #575757;
   border-radius: 8px;
-  padding: 5px 2px;
+  padding: 8px 4px;
   text-align: center;
   min-width: 60px;
   font-size: 12px;
+  position: relative;
+  transition: background-color 0.3s, border-color 0.3s, transform 0.3s;
+}
+
+.hose-item:hover {
+  transform: translateY(-2px);
 }
 
 .hose-item.low {
-  background: #FF4D4D;
+  background: var(--error-color);
+  color: white;
 }
 
 .hose-item .liquid-label {
   font-weight: bold;
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  padding: 0 2px;
 }
 
 .hose-item .percentage {
   font-size: 10px;
+  opacity: 0.9;
 }
 
 /* Grid layout for Hose Assignment page */
 .hose-assign-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* 2 columns */
-  gap: 5px;                             /* space between items */
+  gap: 15px;                             /* space between items */
   max-width: 600px;                      /* optional: limit width */
   margin: 0 auto;                        /* center the grid horizontally */
 }
@@ -223,52 +313,58 @@ table tr:hover {
 .hose-assign-field {
   display: flex;
   flex-direction: column;
-  gap: 1px;               /* spacing between label and input */
+  gap: 5px;               /* spacing between label and input */
 }
 
 .hose-assign-field label {
   font-weight: 500;
+  text-align: left;
 }
 
-/* Optional: style the form actions container */
+/* Form actions container */
 .form-actions {
-  margin-top: 20px;
+  margin-top: 30px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
-/* Buttons inside form-actions can be further styled if needed */
+/* Buttons inside form-actions */
 .form-actions .button {
-  min-width: 100px;
+  min-width: 120px;
 }
 
 /* Drink Cards Grid */
 .drinks-grid {
   display: grid;
-  grid-template-columns: repeat(2, 320px);
-  grid-column-gap: 68px;
-  grid-row-gap: 22px;
-  justify-content: start;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+  justify-content: center;
   margin: 20px 5px;
 }
 
 /* Each Drink Card */
 .drink-card {
-  width: 320px;
+  width: 100%;
   position: relative;
   background: #282828;
-  border: 1px solid #333333;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
-  padding-bottom: 25%; /* Reserve space for fixed mix button */
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  padding-bottom: 80px; /* Reserve space for fixed mix button */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   overflow: hidden;
-  transition: background 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.drink-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
 }
 
 .drink-card h3 {
   margin: 0 0 10px;
-  color: #F0F0F0;
+  color: var(--text-primary);
   font-size: 20px;
   font-weight: 600;
   text-align: center;
@@ -277,22 +373,22 @@ table tr:hover {
 .drink-card p {
   margin: 0 0 15px;
   font-size: 14px;
-  color: #B0B0B0;
+  color: var(--text-secondary);
 }
 
 /* Size Options in Drink Cards */
 .size-options {
   display: flex;
-  gap: 20px;
-  margin-top: 20px;
+  gap: 8px;
+  margin-top: 15px;
   margin-bottom: 5px;
 }
 
 .size-option {
   flex: 1;
-  background: #1E1E1E;
-  border: 1px solid #333333;
-  border-radius: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   text-align: center;
   cursor: pointer;
   transition: background 0.3s ease;
@@ -308,16 +404,17 @@ table tr:hover {
 .size-option span {
   display: block;
   width: 100%;
-  padding: 8px;
-  color: #F0F0F0;
+  padding: 8px 4px;
+  color: var(--text-primary);
   transition: background 0.3s ease, color 0.3s ease;
   text-align: center;
+  font-size: 14px;
 }
 
 .size-option input[type="radio"]:checked + span {
-  background: linear-gradient(45deg, #70e25a, #5ca044);
-  color: #FFFFFF;
-  border-radius: 10px;
+  background: linear-gradient(45deg, var(--accent-color), var(--accent-dark));
+  color: white;
+  border-radius: 6px;
 }
 
 /* Fixed Mix Button Section in Drink Card */
@@ -326,7 +423,7 @@ table tr:hover {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 25%;
+  height: 60px;
 }
 
 .mix-section .button {
@@ -334,6 +431,7 @@ table tr:hover {
   height: 100%;
   border-radius: 0 0 12px 12px;
   font-size: 18px;
+  margin: 0;
 }
 
 /* Settings Header */
@@ -346,7 +444,7 @@ table tr:hover {
 
 .settings-header h2 {
   margin: 0;
-  color: #F0F0F0;
+  color: var(--text-primary);
 }
 
 /* Pump Selection Boxes */
@@ -355,57 +453,138 @@ table tr:hover {
   justify-content: center;
   gap: 10px;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .pump-box {
   width: 60px;
   height: 60px;
   line-height: 60px;
-  border: 1px solid #333333;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
-  background: #1E1E1E;
-  color: #F0F0F0;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   text-align: center;
   font-size: 18px;
-  transition: background-color 0.3s, color 0.3s;
+  transition: all 0.3s ease;
 }
 
 .pump-box:hover {
   background: #2a2a2a;
+  transform: translateY(-2px);
 }
 
 .pump-box.selected {
-  background: linear-gradient(45deg, #70e25a, #5ca044);
-  color: #FFFFFF;
-  border: 2px solid #333333;
+  background: linear-gradient(45deg, var(--accent-color), var(--accent-dark));
+  color: white;
+  border: none;
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(112, 226, 90, 0.5);
 }
 
 /* PIN Entry Page Styles */
 #pin-display {
-  font-size: 1.5rem;       /* Slightly smaller font */
-  margin-bottom: 10px;
+  font-size: 2rem;
+  margin-bottom: 20px;
   text-align: center;
+  letter-spacing: 5px;
 }
 
 #pin-pad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;                /* Reduced gap between buttons */
-  max-width: 250px;        /* Smaller max-width to fit on the screen */
+  gap: 10px;
+  max-width: 300px;
   margin: 0 auto;
 }
 
 #pin-pad button {
-  padding: 10px;           /* Reduced padding for a smaller button */
-  font-size: 18px;         /* Smaller font size */
-  /* Optional: Adjust line-height if needed */
-  line-height: 1;
+  padding: 15px;
+  font-size: 20px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-/* Adjust the submit button if needed */
-#pin-pad button:last-child {
-  grid-column: 1 / -1;
+#pin-pad button:hover {
+  background-color: #333;
+  transform: translateY(-2px);
+}
+
+#pin-pad button:active {
+  transform: translateY(1px);
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 30px 0 20px 0;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 20px auto;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid var(--accent-color);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Alerts */
+.alert {
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  border-left: 4px solid;
+}
+
+.alert.info {
+  border-left-color: #3498db;
+}
+
+.alert.warning {
+  border-left-color: var(--warning-color);
+}
+
+.alert.error {
+  border-left-color: var(--error-color);
+}
+
+.alert.success {
+  border-left-color: var(--success-color);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 /* Responsive */
@@ -417,9 +596,51 @@ table tr:hover {
   
   .content {
     height: auto;
+    padding: 10px;
   }
   
   .drinks-grid {
-    grid-template-columns: repeat(2, 320px);
+    grid-template-columns: 1fr;
   }
+  
+  .hose-status {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .hose-item {
+    min-width: 22%; /* roughly 4 per row */
+    margin-bottom: 8px;
+  }
+  
+  .size-options {
+    flex-direction: column;
+  }
+  
+  .button, a.button {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .hose-assign-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Accessibility */
+.button:focus, a:focus, input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
 }

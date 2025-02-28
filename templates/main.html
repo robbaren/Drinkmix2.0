@@ -1,54 +1,442 @@
 {% extends "base.html" %}
 {% block content %}
-<!-- Hose Status Boxes Row (staying within 800px via .content) -->
-<div class="hose-status">
+<!-- Hose Status Indicators - with defensive checking -->
+<div class="hose-status" x-data="{ activeHose: null }">
   {% for i in range(1, 9) %}
     {% set hose = hose_status[i] %}
-    <div class="hose-item {% if hose.percent < 20 %}low{% endif %}">
+    <div class="hose-item {% if hose.percent < 20 %}low{% endif %} {% if hose.maintenance and hose.maintenance.get('needs_maintenance', False) %}maintenance{% endif %}"
+         x-on:click="activeHose = activeHose === {{ i }} ? null : {{ i }}">
+         
       <span class="liquid-label">{{ hose.ingredient or ("H" ~ i) }}</span>
       <span class="percentage">{{ hose.percent }}%</span>
+      
+      {% if hose.maintenance and hose.maintenance.get('needs_maintenance', False) %}
+      <span class="maintenance-icon">⚠️</span>
+      {% endif %}
+      
+      <!-- Interactive tooltip shown when tapped -->
+      <div class="hose-tooltip" x-show="activeHose === {{ i }}" x-transition>
+        <strong>{{ hose.ingredient or ("Hose " ~ i) }}</strong>
+        <p>Remaining: {{ hose.remaining }}ml / {{ hose.total }}ml</p>
+        {% if hose.maintenance and hose.maintenance.get('needs_maintenance', False) %}
+        <p class="text-error">Maintenance required!</p>
+        {% endif %}
+      </div>
     </div>
   {% endfor %}
 </div>
 
-<!-- Available Drinks (Centered) -->
-<h2 style="text-align: center;">CHOOSE YOUR DRINK</h2>
+{% if maintenance_needed %}
+<!-- Maintenance Alert - now collapsible -->
+<div class="alert alert-warning" x-data="{ open: true }">
+  <div class="alert-header" x-on:click="open = !open">
+    <span class="alert-icon">⚠️</span>
+    <span>Maintenance required on one or more pumps</span>
+    <span class="alert-toggle" x-text="open ? '▲' : '▼'"></span>
+  </div>
+  <div class="alert-content" x-show="open" x-transition>
+    <p>Some pumps require maintenance. This may affect drink quality.</p>
+    <a href="{{ url_for('maintenance') }}" class="touch-button">View Details</a>
+  </div>
+</div>
+{% endif %}
 
-<!-- Drinks Grid forced to 2 columns -->
+<!-- Available Drinks Header -->
+<h2 class="text-center">CHOOSE YOUR DRINK</h2>
+
+<!-- Recommendations Section - now with a tab interface -->
+{% if recommendations and recommendations|length > 0 %}
+<div class="recommendations-section" x-data="{ showRecommended: true }">
+  <div class="tabs">
+    <button class="tab-button" 
+            :class="{ 'active': showRecommended }" 
+            x-on:click="showRecommended = true">
+      Recommended
+    </button>
+    <button class="tab-button" 
+            :class="{ 'active': !showRecommended }" 
+            x-on:click="showRecommended = false">
+      All Drinks
+    </button>
+  </div>
+
+  <div x-show="showRecommended" x-transition>
+    <div class="drinks-grid">
+      {% for drink in recommendations %}
+      <!-- Drink Card with enhanced interactivity -->
+      <div class="drink-card" x-data="{ showInfo: false }">
+        <div class="recommendation-badge">Recommended</div>
+        <h3>{{ drink.drink_name }}</h3>
+        
+        <!-- Toggle between info and order mode -->
+        <div class="card-action-toggle">
+          <button type="button" class="toggle-button" x-on:click="showInfo = !showInfo">
+            <span x-show="!showInfo">ⓘ Info</span>
+            <span x-show="showInfo">Order</span>
+          </button>
+        </div>
+        
+        <!-- Info panel -->
+        <div class="drink-info" x-show="showInfo" x-transition>
+          {% if drink.notes %}
+            <p>{{ drink.notes }}</p>
+          {% endif %}
+          
+          <h4>Ingredients:</h4>
+          <ul class="ingredients-list">
+            {% for ingredient, percentage in drink.ingredients.items() %}
+            <li>{{ ingredient }} ({{ percentage }}%)</li>
+            {% endfor %}
+          </ul>
+        </div>
+        
+        <!-- Order panel -->
+        <div x-show="!showInfo" x-transition>
+          <form method="post" action="{{ url_for('mix_drink_route', drink_id=drink.drink_id) }}">
+            <div class="size-options">
+              <label class="size-option">
+                <input type="radio" name="size" value="40" x-model="size">
+                <span class="size-option-label">Shot - 40ml</span>
+              </label>
+              <label class="size-option">
+                <input type="radio" name="size" value="375" checked x-model="size">
+                <span class="size-option-label">Regular - 375ml</span>
+              </label>
+              <label class="size-option">
+                <input type="radio" name="size" value="500" x-model="size">
+                <span class="size-option-label">Large - 500ml</span>
+              </label>
+            </div>
+            
+            <!-- Submit button with touch feedback -->
+            <button type="submit" 
+                    class="touch-button mix-button" 
+                    x-data="{ pressed: false }" 
+                    x-on:touchstart="pressed = true" 
+                    x-on:touchend="pressed = false"
+                    :class="{ 'button-pressed': pressed }"
+                    {% if is_mixing %}disabled{% endif %}>
+              Mix
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- All Available Drinks -->
+  <div x-show="!showRecommended" x-transition>
+    <div class="drinks-grid">
+      {% for drink in drinks %}
+      {% if not (recommendations and drink.drink_id in [rec.drink_id for rec in recommendations]) %}
+      <div class="drink-card" x-data="{ showInfo: false }">
+        <h3>{{ drink.drink_name }}</h3>
+        
+        <!-- Toggle between info and order mode -->
+        <div class="card-action-toggle">
+          <button type="button" class="toggle-button" x-on:click="showInfo = !showInfo">
+            <span x-show="!showInfo">ⓘ Info</span>
+            <span x-show="showInfo">Order</span>
+          </button>
+        </div>
+        
+        <!-- Info panel -->
+        <div class="drink-info" x-show="showInfo" x-transition>
+          {% if drink.notes %}
+            <p>{{ drink.notes }}</p>
+          {% endif %}
+          
+          <h4>Ingredients:</h4>
+          <ul class="ingredients-list">
+            {% for ingredient, percentage in drink.ingredients.items() %}
+            <li>{{ ingredient }} ({{ percentage }}%)</li>
+            {% endfor %}
+          </ul>
+        </div>
+        
+        <!-- Order panel -->
+        <div x-show="!showInfo" x-transition>
+          <form method="post" action="{{ url_for('mix_drink_route', drink_id=drink.drink_id) }}">
+            <div class="size-options">
+              <label class="size-option">
+                <input type="radio" name="size" value="40" x-model="size">
+                <span class="size-option-label">Shot - 40ml</span>
+              </label>
+              <label class="size-option">
+                <input type="radio" name="size" value="375" checked x-model="size">
+                <span class="size-option-label">Regular - 375ml</span>
+              </label>
+              <label class="size-option">
+                <input type="radio" name="size" value="500" x-model="size">
+                <span class="size-option-label">Large - 500ml</span>
+              </label>
+            </div>
+            
+            <!-- Submit button with touch feedback -->
+            <button type="submit" 
+                    class="touch-button mix-button" 
+                    x-data="{ pressed: false }" 
+                    x-on:touchstart="pressed = true" 
+                    x-on:touchend="pressed = false"
+                    :class="{ 'button-pressed': pressed }"
+                    {% if is_mixing %}disabled{% endif %}>
+              Mix
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% else %}
+<!-- Regular Drinks Display (no recommendations) -->
 <div class="drinks-grid">
   {% for drink in drinks %}
-  <div class="drink-card">
+  <div class="drink-card" x-data="{ showInfo: false }">
     <h3>{{ drink.drink_name }}</h3>
-    {% if drink.notes %}
-      <p>{{ drink.notes }}</p>
-    {% endif %}
-    <form method="post" action="{{ url_for('mix_drink_route', drink_id=drink.drink_id) }}">
-      <!-- Size Options -->
-      <div class="size-options">
-        <label class="size-option">
-          <input type="radio" name="size" value="40">
-          <span>Shot - 40ml</span>
-        </label>
-        <label class="size-option">
-          <input type="radio" name="size" value="375" checked>
-          <span>Average - 375ml</span>
-        </label>
-        <label class="size-option">
-          <input type="radio" name="size" value="500">
-          <span>Large - 500ml</span>
-        </label>
-      </div>
-      <!-- Fixed Mix Button Section -->
-      <div class="mix-section">
-        <button type="submit" class="button" {% if is_mixing %}disabled{% endif %}>Mix</button>
-      </div>
-    </form>
+    
+    <!-- Toggle between info and order mode -->
+    <div class="card-action-toggle">
+      <button type="button" class="toggle-button" x-on:click="showInfo = !showInfo">
+        <span x-show="!showInfo">ⓘ Info</span>
+        <span x-show="showInfo">Order</span>
+      </button>
+    </div>
+    
+    <!-- Info panel -->
+    <div class="drink-info" x-show="showInfo" x-transition>
+      {% if drink.notes %}
+        <p>{{ drink.notes }}</p>
+      {% endif %}
+      
+      <h4>Ingredients:</h4>
+      <ul class="ingredients-list">
+        {% for ingredient, percentage in drink.ingredients.items() %}
+        <li>{{ ingredient }} ({{ percentage }}%)</li>
+        {% endfor %}
+      </ul>
+    </div>
+    
+    <!-- Order panel -->
+    <div x-show="!showInfo" x-transition>
+      <form method="post" action="{{ url_for('mix_drink_route', drink_id=drink.drink_id) }}">
+        <div class="size-options">
+          <label class="size-option">
+            <input type="radio" name="size" value="40" x-model="size">
+            <span class="size-option-label">Shot - 40ml</span>
+          </label>
+          <label class="size-option">
+            <input type="radio" name="size" value="375" checked x-model="size">
+            <span class="size-option-label">Regular - 375ml</span>
+          </label>
+          <label class="size-option">
+            <input type="radio" name="size" value="500" x-model="size">
+            <span class="size-option-label">Large - 500ml</span>
+          </label>
+        </div>
+        
+        <!-- Submit button with touch feedback -->
+        <button type="submit" 
+                class="touch-button mix-button" 
+                x-data="{ pressed: false }" 
+                x-on:touchstart="pressed = true" 
+                x-on:touchend="pressed = false"
+                :class="{ 'button-pressed': pressed }"
+                {% if is_mixing %}disabled{% endif %}>
+          Mix
+        </button>
+      </form>
+    </div>
   </div>
   {% endfor %}
 </div>
+{% endif %}
 
-
-<div class="bottom-nav">
-    <a href="{{ url_for('pin_entry') }}" class="button">Settings</a>
+<!-- Bottom Navigation -->
+<div class="footer-nav">
+  <a href="{{ url_for('main') }}" class="footer-nav-button active">
+    <span class="footer-nav-icon">🥃</span>
+    <span class="footer-nav-label">Drinks</span>
+  </a>
+  
+  <a href="{{ url_for('pin_entry') }}" class="footer-nav-button">
+    <span class="footer-nav-icon">⚙️</span>
+    <span class="footer-nav-label">Settings</span>
+  </a>
+  
+  {% if is_mixing %}
+  <form action="{{ url_for('emergency_stop') }}" method="post" style="display: contents;">
+    <button type="submit" class="footer-nav-button emergency-nav-button">
+      <span class="footer-nav-icon">⚠️</span>
+      <span class="footer-nav-label">STOP</span>
+    </button>
+  </form>
+  {% endif %}
 </div>
+
+<style>
+  /* Additional specific styles for this page */
+  .hose-tooltip {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 150px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--card-radius);
+    padding: 8px;
+    z-index: 10;
+    font-size: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  
+  .hose-tooltip p {
+    margin: 4px 0;
+  }
+  
+  .tabs {
+    display: flex;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .tab-button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px;
+    color: var(--color-text);
+    font-size: var(--font-size-normal);
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .tab-button.active {
+    color: var(--color-primary);
+  }
+  
+  .tab-button.active:after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--color-primary);
+  }
+  
+  .card-action-toggle {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+  
+  .toggle-button {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 50px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+  
+  .ingredients-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: var(--font-size-small);
+  }
+  
+  .ingredients-list li {
+    padding: 4px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .recommendation-badge {
+    position: absolute;
+    top: -8px;
+    left: 8px;
+    background: var(--color-primary);
+    color: white;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  
+  .alert-header {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .alert-icon {
+    margin-right: 8px;
+  }
+  
+  .alert-toggle {
+    margin-left: auto;
+  }
+  
+  .alert-content {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border);
+  }
+  
+  .emergency-nav-button {
+    color: var(--color-error);
+  }
+  
+  .drinks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+  }
+  
+  @media (max-width: 600px) {
+    .drinks-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Fix for the maintenance icon */
+  .maintenance-icon {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+  }
+  
+  .hose-item {
+    position: relative;
+  }
+  
+  .hose-item.maintenance {
+    border-color: var(--color-error);
+  }
+  
+  /* Style for the drink info */
+  .drink-info {
+    padding: 10px 0;
+  }
+  
+  .drink-info h4 {
+    margin: 10px 0 5px 0;
+    font-size: 14px;
+  }
+  
+  .drink-info p {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+  }
+  
+  .text-error {
+    color: var(--color-error);
+  }
+</style>
 {% endblock %}

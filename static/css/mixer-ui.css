@@ -1,0 +1,534 @@
+/* ===============================
+   Smart Drink Mixer - Touch-Optimized UI
+   For 7" Raspberry Pi Touchscreen
+=============================== */
+
+:root {
+  /* Color Scheme - Feel free to adjust */
+  --color-background: #121212;
+  --color-surface: #1E1E1E;
+  --color-surface-variant: #282828;
+  --color-primary: #70e25a;
+  --color-primary-dark: #5ca044;
+  --color-text: #F0F0F0;
+  --color-text-secondary: #B0B0B0;
+  --color-border: #333333;
+  --color-error: #ff4d4d;
+  --color-warning: #ffbb33;
+  --color-success: #70e25a;
+  
+  /* Touch Sizes - Optimized for 7" screen */
+  --touch-target-size: 44px; /* Minimum touch target size */
+  --page-padding: 16px;
+  --card-radius: 8px;
+  --font-size-small: 14px;
+  --font-size-normal: 16px;
+  --font-size-large: 20px;
+  --font-size-xlarge: 24px;
+  
+  /* Animation Speeds */
+  --animation-speed-fast: 0.15s;
+  --animation-speed-normal: 0.25s;
+  --animation-speed-slow: 0.4s;
+}
+
+/* ================= Base Styles ================= */
+
+/* Reset & Base */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  width: 100%;
+  height: 100%;
+  line-height: 1.5;
+  /* Improve touch response */
+  touch-action: manipulation;
+  /* Prevent overscroll effects */
+  overscroll-behavior: none;
+  /* Prevent text resizing */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Content Container */
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--page-padding);
+  overflow-y: auto;
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+}
+
+/* Header */
+.app-header {
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--page-padding);
+  text-align: center;
+  height: 60px;
+  box-sizing: border-box;
+  /* Keep header visible */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: var(--font-size-xlarge);
+  color: var(--color-primary);
+  line-height: 1.5;
+}
+
+/* ================= Touch-Friendly Components ================= */
+
+/* Touch Buttons */
+.touch-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target-size);
+  min-width: var(--touch-target-size);
+  padding: 12px 20px;
+  background: linear-gradient(45deg, var(--color-primary), var(--color-primary-dark));
+  color: white;
+  border: none;
+  border-radius: var(--card-radius);
+  font-size: var(--font-size-normal);
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: transform var(--animation-speed-normal) ease, 
+              box-shadow var(--animation-speed-normal) ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  /* Prevent text selection on touch */
+  user-select: none;
+  -webkit-user-select: none;
+  /* Optimize for fast taps */
+  touch-action: manipulation;
+  /* Hardware acceleration */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.touch-button:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.touch-button--secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.touch-button--error {
+  background: var(--color-error);
+}
+
+/* Active state class for Alpine.js */
+.touch-button.button-pressed {
+  transform: scale(0.97);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+/* Touch Cards */
+.touch-card {
+  background: var(--color-surface);
+  border-radius: var(--card-radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Touch List Items */
+.touch-list-item {
+  min-height: var(--touch-target-size);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.touch-list-item:last-child {
+  border-bottom: none;
+}
+
+/* Touch Toggle - Radio/Checkbox */
+.touch-toggle {
+  display: inline-block;
+  position: relative;
+  min-width: var(--touch-target-size);
+  min-height: var(--touch-target-size);
+}
+
+.touch-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.touch-toggle-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 24px;
+  width: 24px;
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  transition: background-color var(--animation-speed-fast) ease;
+}
+
+.touch-toggle input:checked ~ .touch-toggle-indicator {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.touch-toggle-indicator:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.touch-toggle input:checked ~ .touch-toggle-indicator:after {
+  display: block;
+  left: 9px;
+  top: 5px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Touch Sliders */
+.touch-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  background: var(--color-surface);
+  outline: none;
+  border-radius: 10px;
+}
+
+.touch-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--touch-target-size);
+  height: var(--touch-target-size);
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.touch-slider::-moz-range-thumb {
+  width: var(--touch-target-size);
+  height: var(--touch-target-size);
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* ================= Drink Mixer Specific Components ================= */
+
+/* Drink Cards */
+.drink-card {
+  background: var(--color-surface-variant);
+  border-radius: var(--card-radius);
+  padding: 16px;
+  padding-bottom: 60px; /* Space for mix button */
+  margin-bottom: 16px;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.drink-card h3 {
+  margin: 0 0 8px;
+  font-size: var(--font-size-large);
+  text-align: center;
+}
+
+.mix-button {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  border-radius: 0 0 var(--card-radius) var(--card-radius);
+  font-size: var(--font-size-normal);
+  background: linear-gradient(45deg, var(--color-primary), var(--color-primary-dark));
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* Size Options */
+.size-options {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.size-option {
+  flex: 1;
+  text-align: center;
+}
+
+.size-option-label {
+  display: block;
+  padding: 8px 4px;
+  background: var(--color-surface);
+  border-radius: var(--card-radius);
+  cursor: pointer;
+  font-size: var(--font-size-small);
+}
+
+.size-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+}
+
+.size-option input[type="radio"]:checked + .size-option-label {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* Hose Status Indicators */
+.hose-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.hose-item {
+  flex: 1;
+  min-width: 60px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+  padding: 8px 4px;
+  text-align: center;
+  position: relative;
+}
+
+.hose-item.low {
+  border-color: var(--color-error);
+  background: rgba(255, 77, 77, 0.2);
+}
+
+.hose-item .liquid-label {
+  font-weight: bold;
+  display: block;
+  font-size: var(--font-size-small);
+}
+
+.hose-item .percentage {
+  font-size: 12px;
+}
+
+/* Progress indicators */
+.progress-container {
+  height: 20px;
+  background: var(--color-surface);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(45deg, var(--color-primary), var(--color-primary-dark));
+  transition: width var(--animation-speed-normal) ease;
+}
+
+/* ================= Utilities ================= */
+
+/* Animations */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+.animate-pulse {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--animation-speed-normal) ease-in;
+}
+
+/* Text Utilities */
+.text-center { text-align: center; }
+.text-error { color: var(--color-error); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+
+/* Alert Box */
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--card-radius);
+  margin: 16px 0;
+  border-left: 4px solid;
+}
+
+.alert-error {
+  background: rgba(255, 77, 77, 0.1);
+  border-left-color: var(--color-error);
+}
+
+.alert-success {
+  background: rgba(112, 226, 90, 0.1);
+  border-left-color: var(--color-success);
+}
+
+.alert-warning {
+  background: rgba(255, 187, 51, 0.1);
+  border-left-color: var(--color-warning);
+}
+
+/* Space Utilities */
+.mt-16 { margin-top: 16px; }
+.mb-16 { margin-bottom: 16px; }
+.my-16 { margin-top: 16px; margin-bottom: 16px; }
+.p-16 { padding: 16px; }
+
+/* ================= Specific Optimizations for 7" Screen ================= */
+
+@media screen and (max-width: 800px) {
+  /* Increased touch targets */
+  .touch-button {
+    padding: 14px 22px;
+    font-size: var(--font-size-large);
+  }
+  
+  /* Better use of limited screen space */
+  .drink-card {
+    padding: 12px;
+    padding-bottom: 60px;
+  }
+  
+  /* Full-width buttons */
+  .touch-button {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Simplified hose status display */
+  .hose-status {
+    justify-content: center;
+  }
+  
+  .hose-item {
+    min-width: calc(25% - 8px); /* 4 per row with gap */
+    max-width: calc(25% - 8px);
+  }
+}
+
+/* Full-screen overlay for touch-friendly modals */
+.touch-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.touch-modal {
+  background: var(--color-surface);
+  border-radius: var(--card-radius);
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+/* Touch-specific form elements */
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  display: block;
+  width: 100%;
+  min-height: var(--touch-target-size);
+  padding: 8px 12px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--card-radius);
+  color: var(--color-text);
+  font-size: var(--font-size-normal);
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+/* Focus states for touch input */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(112, 226, 90, 0.2);
+}
+
+/* Footer nav */
+.footer-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-surface);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid var(--color-border);
+}
+
+.footer-nav-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  user-select: none;
+}
+
+.footer-nav-button.active {
+  color: var(--color-primary);
+}
+
+.footer-nav-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.footer-nav-label {
+  font-size: var(--font-size-small);
+}
+
+/* Hardware acceleration for animations */
+.hw-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}

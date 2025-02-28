@@ -3,21 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <title>Mix 'O' Matic</title>
-  <meta name="viewport" content="width=800, initial-scale=1">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Prevent zooming on touch devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- Use the consolidated CSS file -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mixer-ui.css') }}">
+  
+  <!-- Socket.IO for real-time updates -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  
+  <!-- Alpine.js for interactive UI -->
+  <script defer src="https://unpkg.com/alpinejs@3.12.3/dist/cdn.min.js"></script>
+  
+  <!-- Main script file -->
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
 </head>
 <body>
   <header class="app-header">
     <h1>Mix 'O' Matic</h1>
   </header>
 
-  <!-- Constrain overall content to 800px -->
+  <!-- Main content section -->
   <section class="content">
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <div class="flash-messages">
+        <div class="touch-card alert animate-fade-in">
           {% for message in messages %}
             <p>{{ message }}</p>
           {% endfor %}
@@ -27,5 +42,16 @@
     
     {% block content %}{% endblock %}
   </section>
+  
+  <!-- Emergency stop component -->
+  {% if is_mixing %}
+  <div class="emergency-stop-container">
+    <form action="{{ url_for('emergency_stop') }}" method="post">
+      <button type="submit" class="touch-button touch-button--error emergency-stop">
+        EMERGENCY STOP
+      </button>
+    </form>
+  </div>
+  {% endif %}
 </body>
 </html>

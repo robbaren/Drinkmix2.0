@@ -1,18 +1,186 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="settings-container" style="text-align: center;">
-  <div class="settings-header">
-    <a href="{{ url_for('main') }}" class="button back-button">← Back</a>
-    <h2>Settings</h2>
-  </div>
-  
-  <div class="settings-links" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 50px;">
-    <a href="{{ url_for('hose_assignment') }}" class="button">Hose Assignment</a>
-    <a href="{{ url_for('hose_status_update') }}" class="button">Hose Status</a>
-    <a href="{{ url_for('bottle_volumes') }}" class="button">Bottle Volumes</a>
-    <a href="{{ url_for('recipes') }}" class="button">Manage Recipes</a>
-    <a href="{{ url_for('calibration') }}" class="button">Calibration</a>
-    <a href="{{ url_for('list_ingredients') }}" class="button">Manage Ingredients</a>
+<!-- Hose Status Boxes Row (staying within 800px via .content) -->
+<div class="hose-status">
+  {% for i in range(1, 9) %}
+    {% set hose = hose_status[i] %}
+    <div class="hose-item {% if hose.percent < 20 %}low{% endif %} {% if hose.maintenance.needs_maintenance %}maintenance{% endif %}"
+         title="{% if hose.maintenance.needs_maintenance %}Maintenance required!{% endif %}">
+      <span class="liquid-label">{{ hose.ingredient or ("H" ~ i) }}</span>
+      <span class="percentage">{{ hose.percent }}%</span>
+      {% if hose.maintenance.needs_maintenance %}
+      <span class="maintenance-icon">⚠️</span>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+
+{% if maintenance_needed %}
+<div class="maintenance-alert">
+  <span class="icon">⚠️</span>
+  <span>Maintenance required on one or more pumps</span>
+  <a href="{{ url_for('maintenance') }}" class="maintenance-link">View Details</a>
+</div>
+{% endif %}
+
+<!-- Available Drinks (Centered) -->
+<h2 style="text-align: center;">CHOOSE YOUR DRINK</h2>
+
+<!-- Smart Recommendations (if available) -->
+{% if recommendations and recommendations|length > 0 %}
+<div class="recommendations-section">
+  <h3>Recommended Drinks</h3>
+  <div class="drinks-grid recommendations">
+    {% for drink in recommendations %}
+    <div class="drink-card recommendation">
+      <div class="recommendation-badge">Recommended</div>
+      <h3>{{ drink.drink_name }}</h3>
+      {% if drink.notes %}
+        <p>{{ drink.notes }}</p>
+      {% endif %}
+      <form method="post" action="{{ url_for('mix_drink_route', drink_id=drink.drink_id) }}">
+        <!-- Size Options -->
+        <div class="size-options">
+          <label class="size-option">
+            <input type="radio" name="size" value="40">
+            <span>Shot - 40ml</span>
+          </label>
+          <label class="size-option">
+            <input type="radio" name="size" value="375" checked>
+            <span>Average - 375ml</span>
+          </label>
+          <label class="size-option">
+            <input type="radio" name="size" value="500">
+            <span>Large - 500ml</span>
+          </label>
+        </div>
+        <!-- Fixed Mix Button Section -->
+        <div class="mix-section">
+          <button type="submit" class="button" {% if is_mixing %}disabled{% endif %}>Mix</button>
+        </div>
+      </form>
+    </div>
+    {% endfor %}
   </div>
 </div>
+{% endif %}
+
+<!-- All Available Drinks -->
+<div class="drinks-grid">
+  {% for drink in drinks %}
+  {% if not (recommendations and drink.drink_id in [rec.drink_id for rec in recommendations]) %}
+  <div class="drink-card">
+    <h3>{{ drink.drink_name }}</h3>
+    {% if drink.notes %}
+      <p>{{ drink.notes }}</p>
+    {% endif %}
+    <form method="post" action="{{ url_for('mix_drink_route', drink_id=drink.drink_id) }}">
+      <!-- Size Options -->
+      <div class="size-options">
+        <label class="size-option">
+          <input type="radio" name="size" value="40">
+          <span>Shot - 40ml</span>
+        </label>
+        <label class="size-option">
+          <input type="radio" name="size" value="375" checked>
+          <span>Average - 375ml</span>
+        </label>
+        <label class="size-option">
+          <input type="radio" name="size" value="500">
+          <span>Large - 500ml</span>
+        </label>
+      </div>
+      <!-- Fixed Mix Button Section -->
+      <div class="mix-section">
+        <button type="submit" class="button" {% if is_mixing %}disabled{% endif %}>Mix</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+<div class="bottom-nav">
+  <a href="{{ url_for('pin_entry') }}" class="button">Settings</a>
+  {% if is_mixing %}
+  <form action="{{ url_for('emergency_stop') }}" method="post" style="display: inline-block;">
+    <button type="submit" class="button emergency-stop">EMERGENCY STOP</button>
+  </form>
+  {% endif %}
+</div>
+
+<style>
+  .maintenance-alert {
+    background: #333;
+    border: 1px solid #ff4d4d;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .maintenance-alert .icon {
+    font-size: 18px;
+    margin-right: 10px;
+  }
+  
+  .maintenance-link {
+    color: #70e25a;
+    text-decoration: underline;
+  }
+  
+  .maintenance-icon {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+  }
+  
+  .hose-item {
+    position: relative;
+  }
+  
+  .hose-item.maintenance {
+    border-color: #ff4d4d;
+  }
+  
+  .recommendations-section {
+    margin: 20px 0;
+  }
+  
+  .recommendations-section h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #70e25a;
+  }
+  
+  .recommendation {
+    position: relative;
+    border: 2px solid #70e25a;
+    box-shadow: 0 0 10px rgba(112, 226, 90, 0.3);
+  }
+  
+  .recommendation-badge {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: linear-gradient(45deg, #70e25a, #5ca044);
+    color: #fff;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 10px;
+  }
+  
+  .emergency-stop {
+    background: #ff4d4d;
+    font-weight: bold;
+    margin-left: 10px;
+  }
+  
+  .emergency-stop:hover {
+    background: #ff3333;
+  }
+</style>
 {% endblock %}

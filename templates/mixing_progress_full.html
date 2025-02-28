@@ -2,91 +2,434 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mixing in Progress</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <title>Mixing in Progress - Mix 'O' Matic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  
+  <!-- Use the consolidated CSS file -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mixer-ui.css') }}">
+  
+  <!-- Socket.IO for real-time updates -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  
+  <!-- Alpine.js for interactive UI -->
+  <script defer src="https://unpkg.com/alpinejs@3.12.3/dist/cdn.min.js"></script>
+  
   <style>
-    /* Full-page progress styling */
-    body, html {
+    /* Mixing page specific styles */
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: var(--color-background);
       margin: 0;
       padding: 0;
-      height: 100%;
-      background: #121212;
-      color: #F0F0F0;
+      overflow: hidden;
+      color: var(--color-text);
+    }
+    
+    .mixing-container {
+      flex: 1;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-    }
-    #mixing-container {
+      padding: 20px;
       text-align: center;
+    }
+    
+    .mixing-header {
+      font-size: 28px;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    
+    /* Bounce animation for dots */
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+    }
+    
+    .loading-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-primary);
+      margin: 0 5px;
+    }
+    
+    .loading-dot:nth-child(1) { animation: bounce 1.4s 0.0s infinite ease-in-out both; }
+    .loading-dot:nth-child(2) { animation: bounce 1.4s 0.2s infinite ease-in-out both; }
+    .loading-dot:nth-child(3) { animation: bounce 1.4s 0.4s infinite ease-in-out both; }
+    
+    /* Shiny progress bar */
+    .progress-container {
       width: 80%;
-    }
-    /* Custom progress bar container */
-    #progress-container {
-      width: 100%;
+      max-width: 400px;
       height: 30px;
-      background: #333;
-      border-radius: 5px;
+      background: var(--color-surface);
+      border-radius: 15px;
       overflow: hidden;
+      position: relative;
       margin: 20px 0;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
     }
-    /* The actual progress bar with smooth transition */
-    #progress-bar {
+    
+    .progress-bar {
       height: 100%;
-      width: 0%;
-      background: linear-gradient(45deg, #70e25a, #5ca044);
-      transition: width 0.5s ease-out;
+      width: 0;
+      background: linear-gradient(45deg, var(--color-primary), var(--color-primary-dark));
+      border-radius: 15px;
+      position: relative;
+      transition: width 0.3s ease-out;
+    }
+    
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -200%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      animation: shine 2s infinite linear;
+    }
+    
+    @keyframes shine {
+      0% { left: -200%; }
+      100% { left: 200%; }
+    }
+    
+    .percentage-text {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 15px 0;
+      color: var(--color-primary);
+    }
+    
+    /* Mixing animation */
+    .mixer-animation {
+      width: 180px;
+      height: 250px;
+      margin: 20px auto;
+      position: relative;
+    }
+    
+    .glass {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 150px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+    }
+    
+    .liquid {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0;
+      background: linear-gradient(45deg, var(--color-primary), var(--color-primary-dark));
+      transition: height 0.5s ease-out;
+    }
+    
+    .bubble {
+      position: absolute;
+      bottom: 10px;
+      width: 8px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      opacity: 0;
+    }
+    
+    .bubble:nth-child(1) {
+      left: 20%;
+      animation: bubble-rise 2s 0.2s infinite;
+    }
+    
+    .bubble:nth-child(2) {
+      left: 50%;
+      animation: bubble-rise 2.2s 0.7s infinite;
+    }
+    
+    .bubble:nth-child(3) {
+      left: 80%;
+      animation: bubble-rise 1.8s 0.4s infinite;
+    }
+    
+    @keyframes bubble-rise {
+      0% {
+        transform: translateY(0) scale(0.5);
+        opacity: 0;
+      }
+      20% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-120px) scale(1);
+        opacity: 0;
+      }
+    }
+    
+    .drop {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 10px;
+      height: 20px;
+      background: var(--color-primary);
+      border-radius: 0 0 5px 5px;
+      transform: translateX(-50%);
+      opacity: 0;
+    }
+    
+    @keyframes drop-fall {
+      0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+      80% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+      }
+    }
+    
+    .splash {
+      position: absolute;
+      bottom: 5px;
+      left: 0;
+      width: 100%;
+      height: 15px;
+      opacity: 0;
+    }
+    
+    .splash-droplet {
+      position: absolute;
+      bottom: 0;
+      width: 6px;
+      height: 6px;
+      background: var(--color-primary);
+      border-radius: 50%;
+    }
+    
+    @keyframes splash {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-15px) scale(0);
+        opacity: 0;
+      }
+    }
+    
+    /* Error display */
+    .error-message {
+      background: rgba(255, 77, 77, 0.1);
+      border: 1px solid var(--color-error);
+      border-radius: var(--card-radius);
+      padding: 15px 20px;
+      margin-top: 20px;
+      font-size: 16px;
+      color: var(--color-error);
+      max-width: 80%;
+      display: none;
+    }
+    
+    /* Stop button */
+    .stop-button {
+      margin-top: 20px;
+      background: var(--color-error);
+      color: white;
+      border: none;
+      border-radius: var(--card-radius);
+      padding: 12px 20px;
+      font-size: var(--font-size-normal);
+      cursor: pointer;
     }
   </style>
 </head>
-<body>
-  <div id="mixing-container">
-    <h2 id="mixing-message">Mixing your drink, please wait!</h2>
-    <div id="progress-container">
-      <div id="progress-bar"></div>
+<body x-data="mixingApp()">
+  <div class="mixing-container">
+    <h1 class="mixing-header">
+      <span x-text="headerText"></span>
+      <span class="loading-dots">
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
+      </span>
+    </h1>
+    
+    <div class="progress-container">
+      <div class="progress-bar" :style="{ width: `${percentage}%` }"></div>
     </div>
-    <p id="mixing-percentage">0%</p>
+    
+    <div class="percentage-text" x-text="`${Math.round(percentage)}%`"></div>
+    
+    <div class="mixer-animation">
+      <div class="glass">
+        <div class="liquid" :style="{ height: `${liquidHeight}%` }">
+          <div class="bubble"></div>
+          <div class="bubble"></div>
+          <div class="bubble"></div>
+        </div>
+      </div>
+      
+      <div class="drop" :class="{ 'animate-drop': isDropping }"></div>
+      
+      <div class="splash" :class="{ 'animate-splash': isSplashing }">
+        <div class="splash-droplet" style="left: 30%;"></div>
+        <div class="splash-droplet" style="left: 50%;"></div>
+        <div class="splash-droplet" style="left: 70%;"></div>
+      </div>
+    </div>
+    
+    <div class="error-message" x-show="errorMessage" x-text="errorMessage"></div>
+    
+    <form action="{{ url_for('emergency_stop') }}" method="post" x-data="{ pressed: false }">
+      <button type="submit" 
+              class="stop-button" 
+              x-on:touchstart="pressed = true" 
+              x-on:touchend="pressed = false"
+              :class="{ 'button-pressed': pressed }">
+        Cancel
+      </button>
+    </form>
   </div>
+  
   <script>
-  const socket = io();
-  let currentProgress = 0;   // current progress value (in %)
-  let targetProgress = 0;    // target progress value received from the server
-
-  // This function smoothly interpolates currentProgress toward targetProgress.
-  function animateProgress() {
-    // Use a simple easing: move 10% of the remaining distance per frame.
-    currentProgress += (targetProgress - currentProgress) * 0.1;
-    // If we're very close, snap to target.
-    if (Math.abs(targetProgress - currentProgress) < 0.1) {
-      currentProgress = targetProgress;
+    function mixingApp() {
+      return {
+        headerText: 'Preparing your drink',
+        percentage: 0,
+        targetPercentage: 0,
+        liquidHeight: 0,
+        isDropping: false,
+        isSplashing: false,
+        errorMessage: null,
+        drinkName: '',
+        
+        init() {
+          const socket = io();
+          this.setupSocketListeners(socket);
+          this.startAnimations();
+        },
+        
+        setupSocketListeners(socket) {
+          // When mixing starts
+          socket.on('mixing_start', (data) => {
+            this.drinkName = data.drink_name;
+            this.headerText = `Mixing your ${data.drink_name}`;
+          });
+          
+          // Progress updates
+          socket.on('mixing_progress', (data) => {
+            this.targetPercentage = data.progress * 100;
+            this.animateProgress();
+          });
+          
+          // Mixing complete
+          socket.on('mixing_complete', () => {
+            this.targetPercentage = 100;
+            this.animateProgress();
+            
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 1500);
+          });
+          
+          // Error handling
+          socket.on('mixing_error', (data) => {
+            this.errorMessage = data.error;
+            
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 3000);
+          });
+        },
+        
+        animateProgress() {
+          // Animate the progress bar smoothly
+          const animate = () => {
+            if (this.percentage < this.targetPercentage) {
+              this.percentage += 0.5;
+              this.liquidHeight = this.percentage * 0.9; // Max 90% full
+              
+              if (this.percentage < this.targetPercentage) {
+                requestAnimationFrame(animate);
+              }
+            }
+          };
+          
+          requestAnimationFrame(animate);
+        },
+        
+        startAnimations() {
+          // Create the dripping and splashing effects
+          const animateDrops = () => {
+            if (this.percentage < 100) {
+              this.isDropping = true;
+              
+              setTimeout(() => {
+                this.isDropping = false;
+                this.isSplashing = true;
+                
+                setTimeout(() => {
+                  this.isSplashing = false;
+                  
+                  setTimeout(() => {
+                    if (this.percentage < 100) {
+                      animateDrops();
+                    }
+                  }, 300);
+                }, 300);
+              }, 800);
+            }
+          };
+          
+          animateDrops();
+        }
+      };
     }
-    document.getElementById('progress-bar').style.width = currentProgress + '%';
-    document.getElementById('mixing-percentage').innerText = Math.round(currentProgress) + '%';
-    // Continue animating if we haven't reached the target.
-    if (currentProgress < targetProgress) {
-      requestAnimationFrame(animateProgress);
-    }
-  }
-
-  socket.on('mixing_progress', function(data) {
-    // Server sends a value between 0 and 1.
-    targetProgress = data.progress * 100;
-    animateProgress();
-  });
-
-  socket.on('mixing_complete', function() {
-    targetProgress = 100;
-    animateProgress();
-    setTimeout(function(){
-      window.location.href = "/";
-    }, 1000);
-  });
-
-  socket.on('mixing_error', function(data) {
-    alert(data.error);
-    window.location.href = "/";
-  });
-</script>
+    
+    // Add CSS for drop animation
+    document.addEventListener('DOMContentLoaded', function() {
+      const styleElement = document.createElement('style');
+      styleElement.textContent = `
+        .animate-drop {
+          animation: drop-fall 0.8s forwards;
+        }
+        
+        .animate-splash .splash-droplet:nth-child(1) {
+          animation: splash 0.3s forwards;
+        }
+        
+        .animate-splash .splash-droplet:nth-child(2) {
+          animation: splash 0.3s 0.05s forwards;
+        }
+        
+        .animate-splash .splash-droplet:nth-child(3) {
+          animation: splash 0.3s 0.1s forwards;
+        }
+      `;
+      document.head.appendChild(styleElement);
+    });
+  </script>
 </body>
 </html>

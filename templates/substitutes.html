@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="substitutes-container">
+  <h2>Ingredient Substitution</h2>
+  
+  <div class="recipe-info">
+    <h3>{{ recipe.drink_name }}</h3>
+    {% if recipe.notes %}
+      <p class="recipe-notes">{{ recipe.notes }}</p>
+    {% endif %}
+    
+    <div class="original-ingredients">
+      <h4>Original Recipe:</h4>
+      <ul>
+        {% for ingredient, percentage in recipe.ingredients.items() %}
+          <li>
+            {{ ingredient }} ({{ percentage }}%)
+            {% if ingredient in unavailable %}
+              <span class="unavailable">Not Available</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  
+  <div class="substitute-alert">
+    <div class="alert-icon">⚠️</div>
+    <p>Some ingredients are not available. You can select substitutes below or skip them.</p>
+  </div>
+  
+  <form method="post" action="{{ url_for('mix_with_substitutes') }}">
+    <input type="hidden" name="drink_id" value="{{ recipe.drink_id }}">
+    <input type="hidden" name="size" value="{{ size }}">
+    
+    <div class="substitute-grid">
+      {% for ingredient in unavailable %}
+        <div class="substitute-item">
+          <div class="unavailable-ingredient">
+            <span class="ingredient-name">{{ ingredient }}</span>
+            <span class="ingredient-percentage">{{ recipe.ingredients[ingredient] }}%</span>
+          </div>
+          
+          <div class="substitute-options">
+            <label>Replace with:</label>
+            <select name="substitute_{{ ingredient|replace(' ', '_') }}">
+              <option value="">-- Skip this ingredient --</option>
+              {% for substitute in substitutes[ingredient] %}
+                <option value="{{ substitute }}">{{ substitute|capitalize }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    
+    <div class="substitute-actions">
+      <a href="{{ url_for('main') }}" class="touch-button touch-button--secondary">Cancel</a>
+      <button type="submit" class="touch-button">Mix with Substitutes</button>
+    </div>
+  </form>
+  
+  <div class="substitute-info">
+    <h4>About Substitutions:</h4>
+    <p>Substituting ingredients may change the taste profile of your drink. The system has suggested alternatives with similar density and characteristics.</p>
+    <p>If you choose to skip an ingredient, the percentages of other ingredients will be adjusted proportionally.</p>
+  </div>
+</div>
+
+<style>
+  .substitutes-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .recipe-info {
+    background: var(--color-surface);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .recipe-notes {
+    font-style: italic;
+    color: var(--color-text-secondary);
+    margin-bottom: 15px;
+  }
+  
+  .original-ingredients ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .original-ingredients li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .unavailable {
+    color: var(--color-error);
+    font-size: 14px;
+    font-weight: bold;
+    margin-left: 10px;
+  }
+  
+  .substitute-alert {
+    background: rgba(255, 187, 51, 0.1);
+    border: 1px solid var(--color-warning);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .alert-icon {
+    font-size: 24px;
+    margin-right: 15px;
+  }
+  
+  .substitute-grid {
+    display: grid;
+    gap: 15px;
+    margin: 20px 0;
+  }
+  
+  .substitute-item {
+    background: var(--color-surface);
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid var(--color-border);
+  }
+  
+  .unavailable-ingredient {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 10px;
+  }
+  
+  .ingredient-name {
+    font-weight: bold;
+    color: var(--color-error);
+  }
+  
+  .ingredient-percentage {
+    color: var(--color-text-secondary);
+  }
+  
+  .substitute-options {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .substitute-options select {
+    width: 100%;
+    min-height: 44px; /* Touch friendly */
+  }
+  
+  .substitute-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+  }
+  
+  .substitute-info {
+    margin-top: 30px;
+    padding: 15px;
+    background: rgba(112, 226, 90, 0.1);
+    border: 1px solid var(--color-accent);
+    border-radius: 8px;
+  }
+  
+  .substitute-info h4 {
+    margin-top: 0;
+    color: var(--color-accent);
+  }
+  
+  @media (max-width: 600px) {
+    .substitute-actions {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .substitute-actions .touch-button {
+      width: 100%;
+    }
+    
+    .original-ingredients li {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .unavailable {
+      margin-left: 0;
+      margin-top: 5px;
+    }
+  }
+</style>
+{% endblock %}

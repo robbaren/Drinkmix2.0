@@ -1,149 +1,465 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="calibration-container" style="max-width:600px; margin:0 auto; text-align:center;">
-    <h2>Calibration & Priming</h2>
+<div class="calibration-container">
+  <h2>Calibration & Priming</h2>
+  
+  <!-- Tabs for Calibration and Priming -->
+  <div class="tabs">
+    <button class="tab-button active" onclick="openTab(event, 'calibration-tab')">Calibration</button>
+    <button class="tab-button" onclick="openTab(event, 'priming-tab')">Priming</button>
+  </div>
+  
+  <!-- Pump Selection Row -->
+  <div class="pump-selection-container">
+    <h3>Select Pump</h3>
+    <div class="pump-selection">
+      {% for i in range(1, 9) %}
+      <div class="pump-box" id="pumpBox{{ i }}" onclick="selectPump({{ i }})">
+        {{ i }}
+      </div>
+      {% endfor %}
+    </div>
     
-    <!-- Pump Selection Row -->
-    <div class="pump-selection" style="display:flex; justify-content:center; gap:10px; margin-bottom:1rem;">
-        {% for i in range(1, 9) %}
-        <div class="pump-box" id="pumpBox{{ i }}" onclick="selectPump({{ i }})">
-            {{ i }}
+    <div class="selected-pump-info">
+      <p>Selected Pump: <span id="selectedPumpDisplay">1</span></p>
+      
+      <!-- Show the assigned ingredient if available -->
+      {% if hose_assignments %}
+      <p>Assigned Liquid: <span id="assignedLiquid">{{ hose_assignments.get(1, "None") }}</span></p>
+      {% endif %}
+      
+      <!-- Show the current calibration if available -->
+      {% if pump_calibrations %}
+      <p>Current Calibration: <span id="currentCalibration">{{ pump_calibrations.get(1, 0)|round(2) }}</span> ml/s</p>
+      {% endif %}
+    </div>
+  </div>
+  
+  <!-- Calibration Tab -->
+  <div id="calibration-tab" class="tab-content">
+    <div class="calibration-section">
+      <h3>Pump Calibration</h3>
+      <div class="calibration-instructions">
+        <ol>
+          <li>Place a measuring cup or graduated cylinder under the selected pump's output.</li>
+          <li>Press and hold the "Run Pump" button to dispense liquid.</li>
+          <li>Release the button when you've dispensed enough to measure accurately.</li>
+          <li>Enter the exact volume dispensed in milliliters.</li>
+          <li>Submit the calibration.</li>
+        </ol>
+      </div>
+      
+      <div class="calibration-controls">
+        <div class="control-row">
+          <button type="button"
+                  id="calibButton"
+                  class="large-button"
+                  onmousedown="startCalibrate()"
+                  onmouseup="stopCalibrate()"
+                  ontouchstart="startCalibrate()"
+                  ontouchend="stopCalibrate()">
+            <span class="button-icon">▶</span>
+            <span class="button-text">Run Pump</span>
+          </button>
         </div>
-        {% endfor %}
+        
+        <div class="result-row">
+          <div class="result-box">
+            <label>Run Time:</label>
+            <div class="result-value"><span id="calibTime">0.00</span> seconds</div>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <label for="dispensed_volume">Dispensed Volume (ml):</label>
+          <input type="number" id="dispensed_volume" min="0" step="0.1" placeholder="Enter volume in ml">
+        </div>
+        
+        <div class="calculated-row">
+          <div class="result-box">
+            <label>Calculated Flow Rate:</label>
+            <div class="result-value"><span id="flowRate">0.00</span> ml/s</div>
+          </div>
+        </div>
+        
+        <button type="button" id="submitCalibButton" onclick="submitCalibration()" class="submit-button">
+          Save Calibration
+        </button>
+      </div>
     </div>
-    
-    <p>Selected Pump: <span id="selectedPumpDisplay">1</span></p>
-    
-    <!-- Calibration Section -->
-    <hr>
-    <h3>Calibrate Pump</h3>
-    <p>Press and hold the button to run the pump and record run time.</p>
-    <button type="button"
-            id="calibButton"
-            style="padding:20px 30px; font-size:18px; margin-bottom:1rem;"
-            onmousedown="startCalibrate()"
-            onmouseup="stopCalibrate()"
-            ontouchstart="startCalibrate()"
-            ontouchend="stopCalibrate()">
-        Press & Hold to Calibrate
-    </button>
-    <p>Run Time: <span id="calibTime">0.00</span> seconds</p>
-    <div style="margin:1rem 0;">
-        <label for="dispensed_volume" style="font-size:16px;">Dispensed Volume (ml):</label><br>
-        <input type="number" id="dispensed_volume" style="width:120px; font-size:16px;" required>
+  </div>
+  
+  <!-- Priming Tab -->
+  <div id="priming-tab" class="tab-content" style="display:none">
+    <div class="priming-section">
+      <h3>Hose Priming</h3>
+      <div class="priming-instructions">
+        <p>Priming helps remove air bubbles from the hose system and prepares it for normal use.</p>
+        <ol>
+          <li>Ensure there's enough liquid in the source container.</li>
+          <li>Place a waste container under the hose output.</li>
+          <li>Press and hold the "Prime Hose" button until liquid flows consistently.</li>
+          <li>Release the button when priming is complete.</li>
+        </ol>
+      </div>
+      
+      <div class="priming-controls">
+        <div class="control-row">
+          <button type="button"
+                  id="primeButton"
+                  class="large-button"
+                  onmousedown="startPrime()"
+                  onmouseup="stopPrime()"
+                  ontouchstart="startPrime()"
+                  ontouchend="stopPrime()">
+            <span class="button-icon">▶</span>
+            <span class="button-text">Prime Hose</span>
+          </button>
+        </div>
+        
+        <div class="result-row">
+          <div class="result-box">
+            <label>Prime Duration:</label>
+            <div class="result-value"><span id="primeTime">0.00</span> seconds</div>
+          </div>
+        </div>
+        
+        <button type="button" onclick="submitPrime()" class="submit-button">
+          Log Priming
+        </button>
+      </div>
     </div>
-    <button type="button" onclick="submitCalibration()" style="padding:14px 24px; font-size:18px;">
-        Submit Calibration
-    </button>
-    
-    <!-- Priming Section -->
-    <hr>
-    <h3>Prime Hose</h3>
-    <p>Press and hold the button to prime the hose.</p>
-    <button type="button"
-            id="primeButton"
-            style="padding:20px 30px; font-size:18px; margin-bottom:1rem;"
-            onmousedown="startPrime()"
-            onmouseup="stopPrime()"
-            ontouchstart="startPrime()"
-            ontouchend="stopPrime()">
-        Press & Hold to Prime
-    </button>
-    <p>Prime Run Time: <span id="primeTime">0.00</span> seconds</p>
-    <button type="button" onclick="submitPrime()" style="padding:14px 24px; font-size:18px;">
-        Confirm Prime
-    </button>
-    
-    <div style="margin-top:2rem;">
-        <a href="{{ url_for('settings') }}" class="button">Back to Settings</a>
-    </div>
+  </div>
+  
+  <div class="calibration-footer">
+    <a href="{{ url_for('settings') }}" class="button back-button">Back to Settings</a>
+  </div>
 </div>
+
+<style>
+  .calibration-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 20px;
+  }
+  
+  .tab-button {
+    background: transparent;
+    border: none;
+    padding: 15px 20px;
+    font-size: 16px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease;
+  }
+  
+  .tab-button:hover {
+    color: var(--text-primary);
+  }
+  
+  .tab-button.active {
+    color: var(--accent-color);
+  }
+  
+  .tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--accent-color);
+  }
+  
+  .tab-content {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Pump selection styling */
+  .pump-selection-container {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .pump-selection-container h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  .pump-selection {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .pump-box {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .pump-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .pump-box.selected {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+  }
+  
+  .selected-pump-info {
+    text-align: center;
+    padding: 10px;
+    border-top: 1px solid var(--border-color);
+    margin-top: 10px;
+  }
+  
+  .selected-pump-info p {
+    margin: 5px 0;
+  }
+  
+  /* Calibration controls */
+  .calibration-instructions, 
+  .priming-instructions {
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  
+  .calibration-instructions ol,
+  .priming-instructions ol {
+    padding-left: 20px;
+  }
+  
+  .calibration-instructions li,
+  .priming-instructions li {
+    margin-bottom: 8px;
+  }
+  
+  .calibration-controls,
+  .priming-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .control-row {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .large-button {
+    width: 200px;
+    height: 80px;
+    background: var(--bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .large-button:hover {
+    background: #2a2a2a;
+    transform: translateY(-2px);
+  }
+  
+  .large-button:active, 
+  .large-button.active {
+    background: var(--accent-color);
+    color: white;
+  }
+  
+  .button-icon {
+    font-size: 24px;
+    margin-bottom: 5px;
+  }
+  
+  .result-row {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .result-box {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 15px;
+    text-align: center;
+    min-width: 200px;
+  }
+  
+  .result-value {
+    font-size: 24px;
+    margin-top: 5px;
+    font-weight: bold;
+  }
+  
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .form-row input {
+    width: 200px;
+    text-align: center;
+    font-size: 18px;
+  }
+  
+  .calculated-row {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .submit-button {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 16px;
+    cursor: pointer;
+    align-self: center;
+    transition: all 0.3s ease;
+  }
+  
+  .submit-button:hover {
+    background: var(--accent-dark);
+    transform: translateY(-2px);
+  }
+  
+  .submit-button:disabled {
+    background: #555;
+    cursor: not-allowed;
+  }
+  
+  .calibration-footer {
+    text-align: center;
+    margin-top: 30px;
+  }
+</style>
 
 <script>
 // Global variable for selected pump; default to 1.
-let selectedPump = 1;
-selectPump(selectedPump);
+window.selectedPump = 1;
+selectPump(window.selectedPump);
+
+// Tab functionality
+function openTab(event, tabId) {
+  // Hide all tab contents
+  const tabContents = document.getElementsByClassName('tab-content');
+  for (let content of tabContents) {
+    content.style.display = 'none';
+  }
+  
+  // Remove active class from all tab buttons
+  const tabButtons = document.getElementsByClassName('tab-button');
+  for (let button of tabButtons) {
+    button.classList.remove('active');
+  }
+  
+  // Show the clicked tab and set active class
+  document.getElementById(tabId).style.display = 'block';
+  event.currentTarget.classList.add('active');
+}
 
 function selectPump(pump) {
-    selectedPump = pump;
-    document.getElementById('selectedPumpDisplay').innerText = pump;
-    for(let i = 1; i <= 8; i++){
-        let box = document.getElementById('pumpBox' + i);
-        if(i === pump){
-            box.classList.add('selected');
-        } else {
-            box.classList.remove('selected');
-        }
+  window.selectedPump = pump;
+  document.getElementById('selectedPumpDisplay').innerText = pump;
+  
+  // Update pump box selection
+  for(let i = 1; i <= 8; i++){
+    const box = document.getElementById('pumpBox' + i);
+    if(box) {
+      if(i === pump){
+        box.classList.add('selected');
+      } else {
+        box.classList.remove('selected');
+      }
     }
+  }
+  
+  // Update assigned liquid if available
+  {% if hose_assignments %}
+  const assignments = {{ hose_assignments|tojson }};
+  const assignedElement = document.getElementById('assignedLiquid');
+  if (assignedElement) {
+    assignedElement.textContent = assignments[pump] || "None";
+  }
+  {% endif %}
+  
+  // Update current calibration if available
+  {% if pump_calibrations %}
+  const calibrations = {{ pump_calibrations|tojson }};
+  const calibrationElement = document.getElementById('currentCalibration');
+  if (calibrationElement) {
+    const calibration = calibrations[pump] || 0;
+    calibrationElement.textContent = calibration.toFixed(2);
+  }
+  {% endif %}
 }
 
-function startCalibrate() {
-    fetch(`/start_pump/${selectedPump}`, { method: 'POST' })
-        .catch(err => console.error(err));
+// Calculate flow rate when either runtime or volume changes
+function calculateFlowRate() {
+  const runTime = parseFloat(document.getElementById('calibTime').innerText) || 0;
+  const volume = parseFloat(document.getElementById('dispensed_volume').value) || 0;
+  
+  let flowRate = 0;
+  if (runTime > 0 && volume > 0) {
+    flowRate = volume / runTime;
+  }
+  
+  document.getElementById('flowRate').innerText = flowRate.toFixed(2);
+  
+  // Enable/disable submit button
+  document.getElementById('submitCalibButton').disabled = (runTime <= 0 || volume <= 0);
 }
 
-function stopCalibrate() {
-    fetch(`/stop_pump/${selectedPump}`, { method: 'POST' })
-        .then(resp => resp.text())
-        .then(seconds => {
-            document.getElementById('calibTime').innerText = seconds;
-        })
-        .catch(err => console.error(err));
-}
+// Event listeners for calculations
+document.addEventListener('DOMContentLoaded', function() {
+  const volumeInput = document.getElementById('dispensed_volume');
+  if (volumeInput) {
+    volumeInput.addEventListener('input', calculateFlowRate);
+  }
+  
+  // Initial calculations
+  calculateFlowRate();
+});
 
-function submitCalibration() {
-    const volume = document.getElementById('dispensed_volume').value;
-    if (!volume) {
-        alert('Please enter the dispensed volume (ml)');
-        return;
-    }
-    let formData = new FormData();
-    formData.append('pump_id', selectedPump);
-    formData.append('dispensed_volume', volume);
-    
-    fetch('/calibrate_pump', {
-        method: 'POST',
-        body: formData
-    })
-    .then(resp => {
-        if(resp.redirected){
-            window.location.href = resp.url;
-        }
-    })
-    .catch(err => console.error(err));
-}
-
-function startPrime() {
-    fetch(`/start_prime/${selectedPump}`, { method: 'POST' })
-        .catch(err => console.error(err));
-}
-
-function stopPrime() {
-    fetch(`/stop_prime/${selectedPump}`, { method: 'POST' })
-        .then(resp => resp.text())
-        .then(seconds => {
-            document.getElementById('primeTime').innerText = seconds;
-        })
-        .catch(err => console.error(err));
-}
-
-function submitPrime() {
-    fetch('/prime_hose', {
-        method: 'POST',
-        body: new FormData(new FormDataConstructor(selectedPump))
-    })
-    .then(resp => {
-        if(resp.redirected){
-            window.location.href = resp.url;
-        }
-    })
-    .catch(err => console.error(err));
-}
-
-function FormDataConstructor(pump) {
-    let fd = new FormData();
-    fd.append('pump_id', pump);
-    return fd;
-}
+// Hook up to script.js functions
 </script>
 {% endblock %}
