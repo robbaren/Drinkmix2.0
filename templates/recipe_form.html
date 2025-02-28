@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>{{ action }} Recipe</h2>
+    <form method="post">
+        <label>Drink Name:</label>
+        <input type="text" name="drink_name" value="{{ recipe.drink_name|default('') }}" required><br>
+        <label>Ingredients (Select from list and specify percentage):</label><br>
+        {# Precompute a sorted list of ingredient items (tuple of key and percentage) #}
+        {% set ing_list = recipe.get('ingredients', {})|dictsort %}
+        {% for i in range(1, 6) %}
+            <select name="ingredient_{{ i }}">
+                <option value="">--Select Ingredient--</option>
+                {% for ing in available_ingredients %}
+                    {% set selected = "" %}
+                    {% for key, value in recipe.get('ingredients', {}).items() %}
+                        {% if key == ing %}
+                            {% set selected = "selected" %}
+                        {% endif %}
+                    {% endfor %}
+                    <option value="{{ ing }}" {{ selected }}>{{ ing }}</option>
+                {% endfor %}
+            </select>
+            <input type="number" name="percentage_{{ i }}" placeholder="Percentage" min="0" max="100"
+                   value="{{ (ing_list[i-1])[1] if ing_list|length >= i else '' }}">
+            <br>
+        {% endfor %}
+        <label>Notes:</label>
+        <textarea name="notes">{{ recipe.notes|default('') }}</textarea><br>
+        <input type="submit" value="Save" class="button">
+        <a href="{{ url_for('recipes') }}" class="button">Cancel</a>
+    </form>
+{% endblock %}

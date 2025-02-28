@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Bottle Volume Definition</h2>
+    <form method="post">
+        {% for i in range(1, 9) %}
+            <label>Hose {{ i }}:</label>
+            <input type="number" name="total_{{ i }}" value="{{ volumes[i].total_volume_ml|default(1000) }}" min="0"> Total (ml)
+            <input type="number" name="remaining_{{ i }}" value="{{ volumes[i].remaining_volume_ml|default(1000) }}" min="0"> Remaining (ml)<br>
+        {% endfor %}
+        <input type="submit" value="Save" class="button">
+        <a href="{{ url_for('settings') }}" class="button">Back</a>
+    </form>
+{% endblock %}

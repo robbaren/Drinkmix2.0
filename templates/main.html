@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Hose Status Boxes Row (staying within 800px via .content) -->
+<div class="hose-status">
+  {% for i in range(1, 9) %}
+    {% set hose = hose_status[i] %}
+    <div class="hose-item {% if hose.percent < 20 %}low{% endif %}">
+      <span class="liquid-label">{{ hose.ingredient or ("H" ~ i) }}</span>
+      <span class="percentage">{{ hose.percent }}%</span>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Available Drinks (Centered) -->
+<h2 style="text-align: center;">CHOOSE YOUR DRINK</h2>
+
+<!-- Drinks Grid forced to 2 columns -->
+<div class="drinks-grid">
+  {% for drink in drinks %}
+  <div class="drink-card">
+    <h3>{{ drink.drink_name }}</h3>
+    {% if drink.notes %}
+      <p>{{ drink.notes }}</p>
+    {% endif %}
+    <form method="post" action="{{ url_for('mix_drink_route', drink_id=drink.drink_id) }}">
+      <!-- Size Options -->
+      <div class="size-options">
+        <label class="size-option">
+          <input type="radio" name="size" value="40">
+          <span>Shot - 40ml</span>
+        </label>
+        <label class="size-option">
+          <input type="radio" name="size" value="375" checked>
+          <span>Average - 375ml</span>
+        </label>
+        <label class="size-option">
+          <input type="radio" name="size" value="500">
+          <span>Large - 500ml</span>
+        </label>
+      </div>
+      <!-- Fixed Mix Button Section -->
+      <div class="mix-section">
+        <button type="submit" class="button" {% if is_mixing %}disabled{% endif %}>Mix</button>
+      </div>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+
+
+<div class="bottom-nav">
+    <a href="{{ url_for('pin_entry') }}" class="button">Settings</a>
+</div>
+{% endblock %}

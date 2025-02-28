@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="settings-container" style="text-align: center;">
+  <div class="settings-header">
+    <a href="{{ url_for('main') }}" class="button back-button">← Back</a>
+    <h2>Settings</h2>
+  </div>
+  
+  <div class="settings-links" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 50px;">
+    <a href="{{ url_for('hose_assignment') }}" class="button">Hose Assignment</a>
+    <a href="{{ url_for('hose_status_update') }}" class="button">Hose Status</a>
+    <a href="{{ url_for('bottle_volumes') }}" class="button">Bottle Volumes</a>
+    <a href="{{ url_for('recipes') }}" class="button">Manage Recipes</a>
+    <a href="{{ url_for('calibration') }}" class="button">Calibration</a>
+    <a href="{{ url_for('list_ingredients') }}" class="button">Manage Ingredients</a>
+  </div>
+</div>
+{% endblock %}

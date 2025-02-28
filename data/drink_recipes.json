@@ -1,0 +1,298 @@
+[
+  {
+    "drink_id": 1,
+    "drink_name": "Moscow Mule",
+    "ingredients": { "Vodka": 29, "Lime Juice": 12, "Soda Water": 59 },
+    "notes": "Add ginger beer manually"
+  },
+  {
+    "drink_id": 2,
+    "drink_name": "Margarita",
+    "ingredients": { "Tequila": 53, "Triple Sec": 26, "Lime Juice": 21 },
+    "notes": "Salt rim manually"
+  },
+  {
+    "drink_id": 3,
+    "drink_name": "Vodka Red Bull",
+    "ingredients": { "Vodka": 25, "Red Bull": 75 },
+    "notes": ""
+  },
+  {
+    "drink_id": 4,
+    "drink_name": "Screwdriver",
+    "ingredients": { "Vodka": 25, "Orange Juice": 75 },
+    "notes": ""
+  },
+  {
+    "drink_id": 5,
+    "drink_name": "Rum and Coke",
+    "ingredients": { "Rum": 25, "Cola": 75 },
+    "notes": ""
+  },
+  {
+    "drink_id": 6,
+    "drink_name": "Gin and Tonic",
+    "ingredients": { "Gin": 25, "Tonic Water": 75 },
+    "notes": ""
+  },
+  {
+    "drink_id": 7,
+    "drink_name": "Tequila Sunrise",
+    "ingredients": { "Tequila": 31, "Orange Juice": 63, "Grenadine": 6 },
+    "notes": "Garnish with an orange slice manually"
+  },
+  {
+    "drink_id": 8,
+    "drink_name": "Whiskey Sour",
+    "ingredients": { "Whiskey": 67, "Sour Mix": 33 },
+    "notes": "Add a dash of bitters manually"
+  },
+  {
+    "drink_id": 9,
+    "drink_name": "Cosmopolitan",
+    "ingredients": { "Vodka": 40, "Triple Sec": 20, "Cranberry Juice": 30, "Lime Juice": 10 },
+    "notes": ""
+  },
+  {
+    "drink_id": 10,
+    "drink_name": "Mai Tai",
+    "ingredients": { "Rum": 44, "Triple Sec": 22, "Lime Juice": 17, "Orgeat Syrup": 17 },
+    "notes": "Optionally add a splash of grenadine manually"
+  },
+  {
+    "drink_id": 11,
+    "drink_name": "Bloody Mary",
+    "ingredients": { "Vodka": 23, "Tomato Juice": 70, "Lemon Juice": 7 },
+    "notes": "Add Worcestershire sauce, hot sauce, salt, and pepper manually"
+  },
+  {
+    "drink_id": 12,
+    "drink_name": "Piña Colada",
+    "ingredients": { "Rum": 28, "Coconut Cream": 17, "Pineapple Juice": 55 },
+    "notes": ""
+  },
+  {
+    "drink_id": 13,
+    "drink_name": "Appletini",
+    "ingredients": { "Vodka": 44, "Sour Apple Liqueur": 22, "Apple Juice": 34 },
+    "notes": ""
+  },
+  {
+    "drink_id": 14,
+    "drink_name": "Sex on the Beach",
+    "ingredients": { "Vodka": 29, "Peach Schnapps": 14, "Cranberry Juice": 29, "Orange Juice": 28 },
+    "notes": ""
+  },
+  {
+    "drink_id": 15,
+    "drink_name": "Blue Lagoon",
+    "ingredients": { "Vodka": 33, "Blue Curaçao": 17, "Lemonade": 50 },
+    "notes": ""
+  },
+  {
+    "drink_id": 16,
+    "drink_name": "White Russian",
+    "ingredients": { "Vodka": 44, "Coffee Liqueur": 22, "Milk": 34 },
+    "notes": ""
+  },
+  {
+    "drink_id": 17,
+    "drink_name": "Black Russian",
+    "ingredients": { "Vodka": 67, "Coffee Liqueur": 33 },
+    "notes": ""
+  },
+  {
+    "drink_id": 18,
+    "drink_name": "Tom Collins",
+    "ingredients": { "Gin": 27, "Lemon Juice": 11, "Simple Syrup": 8, "Soda Water": 54 },
+    "notes": "Add ice and garnish manually"
+  },
+  {
+    "drink_id": 19,
+    "drink_name": "Mint Julep",
+    "ingredients": { "Bourbon": 77, "Simple Syrup": 23 },
+    "notes": "Add fresh mint manually"
+  },
+  {
+    "drink_id": 20,
+    "drink_name": "Amaretto Sour",
+    "ingredients": { "Amaretto": 67, "Sour Mix": 33 },
+    "notes": "Add a lemon twist manually"
+  },
+  {
+    "drink_id": 21,
+    "drink_name": "Long Island Iced Tea",
+    "ingredients": {
+      "Vodka": 11,
+      "Tequila": 11,
+      "Rum": 11,
+      "Gin": 11,
+      "Triple Sec": 11,
+      "Lemon Juice": 15,
+      "Simple Syrup": 7,
+      "Cola": 23
+    },
+    "notes": "Add a splash of cola manually if desired and garnish with a lemon wedge"
+  },
+  {
+    "drink_id": 22,
+    "drink_name": "Long Beach Iced Tea",
+    "ingredients": {
+      "Vodka": 11,
+      "Tequila": 11,
+      "Rum": 11,
+      "Gin": 11,
+      "Triple Sec": 11,
+      "Cranberry Juice": 38,
+      "Simple Syrup": 7
+    },
+    "notes": "Garnish with a lime wedge manually"
+  },
+  {
+    "drink_id": 23,
+    "drink_name": "Negroni",
+    "ingredients": { "Gin": 33, "Vermouth": 33, "Campari": 34 },
+    "notes": ""
+  },
+  {
+    "drink_id": 24,
+    "drink_name": "Manhattan",
+    "ingredients": { "Whiskey": 71, "Vermouth": 29 },
+    "notes": "Add a dash of bitters manually"
+  },
+  {
+    "drink_id": 25,
+    "drink_name": "Sidecar",
+    "ingredients": { "Cognac": 59, "Triple Sec": 24, "Lemon Juice": 17 },
+    "notes": ""
+  },
+  {
+    "drink_id": 26,
+    "drink_name": "French 75",
+    "ingredients": { "Gin": 33, "Champagne": 51, "Lemon Juice": 8, "Simple Syrup": 8 },
+    "notes": "Garnish with a lemon twist manually"
+  },
+  {
+    "drink_id": 27,
+    "drink_name": "Espresso Martini",
+    "ingredients": { "Vodka": 44, "Coffee Liqueur": 22, "Espresso": 34 },
+    "notes": ""
+  },
+  {
+    "drink_id": 28,
+    "drink_name": "Cuba Libre",
+    "ingredients": { "Rum": 23, "Cola": 70, "Lime Juice": 7 },
+    "notes": "Garnish with a lime wedge manually"
+  },
+  {
+    "drink_id": 29,
+    "drink_name": "Bellini",
+    "ingredients": { "Prosecco": 100 },
+    "notes": "Add peach puree manually"
+  },
+  {
+    "drink_id": 30,
+    "drink_name": "Fuzzy Navel",
+    "ingredients": { "Peach Schnapps": 29, "Orange Juice": 71 },
+    "notes": ""
+  },
+  {
+    "drink_id": 31,
+    "drink_name": "Singapore Sling",
+    "ingredients": {
+      "Gin": 16,
+      "Cherry Brandy": 8,
+      "Cointreau": 8,
+      "Benedictine": 5,
+      "Lime Juice": 8,
+      "Pineapple Juice": 22,
+      "Grenadine": 5,
+      "Soda Water": 28
+    },
+    "notes": "Garnish with a cherry manually"
+  },
+  {
+    "drink_id": 32,
+    "drink_name": "Paloma",
+    "ingredients": { "Tequila": 23, "Grapefruit Juice": 47, "Soda Water": 23, "Lime Juice": 7 },
+    "notes": "Garnish with a lime wedge manually"
+  },
+  {
+    "drink_id": 33,
+    "drink_name": "Caipirinha",
+    "ingredients": { "Cachaça": 63, "Lime Juice": 19, "Simple Syrup": 18 },
+    "notes": "Muddle lime manually"
+  },
+  {
+    "drink_id": 34,
+    "drink_name": "Sazerac",
+    "ingredients": { "Rye Whiskey": 100 },
+    "notes": "Rinse glass with absinthe and add sugar and Peychaud's bitters manually"
+  },
+  {
+    "drink_id": 35,
+    "drink_name": "Daiquiri",
+    "ingredients": { "Rum": 59, "Lime Juice": 24, "Simple Syrup": 17 },
+    "notes": ""
+  },
+  {
+    "drink_id": 36,
+    "drink_name": "French Martini",
+    "ingredients": { "Vodka": 44, "Raspberry Liqueur": 22, "Pineapple Juice": 34 },
+    "notes": ""
+  },
+  {
+    "drink_id": 37,
+    "drink_name": "Strawberry Daiquiri",
+    "ingredients": { "Rum": 59, "Lime Juice": 24, "Simple Syrup": 17 },
+    "notes": "Add strawberry puree manually"
+  },
+  {
+    "drink_id": 38,
+    "drink_name": "Clover Club",
+    "ingredients": { "Gin": 53, "Lemon Juice": 27, "Raspberry Syrup": 20 },
+    "notes": "Add egg white manually"
+  },
+  {
+    "drink_id": 39,
+    "drink_name": "Pisco Sour",
+    "ingredients": { "Pisco": 59, "Lime Juice": 24, "Simple Syrup": 17 },
+    "notes": "Add egg white manually"
+  },
+  {
+    "drink_id": 40,
+    "drink_name": "Aviation",
+    "ingredients": { "Gin": 67, "Maraschino Liqueur": 17, "Lemon Juice": 16 },
+    "notes": "Add Crème de Violette manually if desired"
+  },
+  {
+    "drink_id": 41,
+    "drink_name": "Rum Punch",
+    "ingredients": { "Rum": 29, "Pineapple Juice": 29, "Orange Juice": 28, "Grenadine": 7, "Lime Juice": 7 },
+    "notes": ""
+  },
+  {
+    "drink_id": 42,
+    "drink_name": "Zombie",
+    "ingredients": { "Light Rum": 22, "Dark Rum": 23, "Apricot Brandy": 11, "Pineapple Juice": 30, "Lime Juice": 7, "Grenadine": 7 },
+    "notes": "Add bitters manually if desired"
+  },
+  {
+    "drink_id": 43,
+    "drink_name": "Adios Motherf",
+    "ingredients": { "Vodka": 15, "Tequila": 15, "Rum": 15, "Gin": 15, "Blue Curaçao": 15, "Lemon-Lime Soda": 25 },
+    "notes": ""
+  },
+  {
+    "drink_id": 44,
+    "drink_name": "Vodka Orange Juice",
+    "ingredients": { "Vodka": 25, "Orange Juice": 75 },
+    "notes": ""
+  },
+  {
+    "drink_id": 45,
+    "drink_name": "Shot",
+    "ingredients": { "Spirit": 100 },
+    "notes": ""
+  }
+]

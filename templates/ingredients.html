@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="settings-page">
+  <h2>Manage Ingredients</h2>
+  <a href="{{ url_for('add_ingredient') }}" class="button">Add Ingredient</a>
+  <table style="margin-top: 20px;">
+    <tr>
+      <th>Ingredient</th>
+      <th>Density</th>
+    </tr>
+    {% for ing, dens in densities.items() %}
+    <tr>
+      <td>{{ ing }}</td>
+      <td>{{ dens }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <div style="margin-top: 20px;">
+    <a href="{{ url_for('settings') }}" class="button">Back</a>
+  </div>
+</div>
+{% endblock %}

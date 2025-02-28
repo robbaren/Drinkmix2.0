@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="recipes-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+  <!-- Back button on the left -->
+  <a href="{{ url_for('settings') }}" class="button back-button" style="padding: 8px 12px; font-size: 16px;">
+    Back
+  </a>
+  <!-- Page title centered -->
+  <h2 style="margin: 0; flex-grow: 1; text-align: center;">Manage Recipes</h2>
+  <!-- Plus sign button on the right -->
+  <a href="{{ url_for('add_recipe') }}" class="button" style="padding: 8px 12px; font-size: 24px; line-height: 1;">
+    +
+  </a>
+</div>
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Ingredients</th>
+    <th>Notes</th>
+    <th>Actions</th>
+  </tr>
+  {% for recipe in recipes %}
+  <tr>
+    <td>{{ recipe.drink_id }}</td>
+    <td>{{ recipe.drink_name }}</td>
+    <td>{{ recipe.ingredients|tojson }}</td>
+    <td>{{ recipe.notes }}</td>
+    <td>
+      <a href="{{ url_for('edit_recipe', drink_id=recipe.drink_id) }}" class="button">Edit</a>
+      <form method="post" action="{{ url_for('delete_recipe', drink_id=recipe.drink_id) }}" style="display:inline;">
+        <input type="submit" value="Delete" class="button" onclick="return confirm('Are you sure?');">
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

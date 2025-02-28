@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="calibration-container" style="max-width:600px; margin:0 auto; text-align:center;">
+    <h2>Calibration & Priming</h2>
+    
+    <!-- Pump Selection Row -->
+    <div class="pump-selection" style="display:flex; justify-content:center; gap:10px; margin-bottom:1rem;">
+        {% for i in range(1, 9) %}
+        <div class="pump-box" id="pumpBox{{ i }}" onclick="selectPump({{ i }})">
+            {{ i }}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <p>Selected Pump: <span id="selectedPumpDisplay">1</span></p>
+    
+    <!-- Calibration Section -->
+    <hr>
+    <h3>Calibrate Pump</h3>
+    <p>Press and hold the button to run the pump and record run time.</p>
+    <button type="button"
+            id="calibButton"
+            style="padding:20px 30px; font-size:18px; margin-bottom:1rem;"
+            onmousedown="startCalibrate()"
+            onmouseup="stopCalibrate()"
+            ontouchstart="startCalibrate()"
+            ontouchend="stopCalibrate()">
+        Press & Hold to Calibrate
+    </button>
+    <p>Run Time: <span id="calibTime">0.00</span> seconds</p>
+    <div style="margin:1rem 0;">
+        <label for="dispensed_volume" style="font-size:16px;">Dispensed Volume (ml):</label><br>
+        <input type="number" id="dispensed_volume" style="width:120px; font-size:16px;" required>
+    </div>
+    <button type="button" onclick="submitCalibration()" style="padding:14px 24px; font-size:18px;">
+        Submit Calibration
+    </button>
+    
+    <!-- Priming Section -->
+    <hr>
+    <h3>Prime Hose</h3>
+    <p>Press and hold the button to prime the hose.</p>
+    <button type="button"
+            id="primeButton"
+            style="padding:20px 30px; font-size:18px; margin-bottom:1rem;"
+            onmousedown="startPrime()"
+            onmouseup="stopPrime()"
+            ontouchstart="startPrime()"
+            ontouchend="stopPrime()">
+        Press & Hold to Prime
+    </button>
+    <p>Prime Run Time: <span id="primeTime">0.00</span> seconds</p>
+    <button type="button" onclick="submitPrime()" style="padding:14px 24px; font-size:18px;">
+        Confirm Prime
+    </button>
+    
+    <div style="margin-top:2rem;">
+        <a href="{{ url_for('settings') }}" class="button">Back to Settings</a>
+    </div>
+</div>
+
+<script>
+// Global variable for selected pump; default to 1.
+let selectedPump = 1;
+selectPump(selectedPump);
+
+function selectPump(pump) {
+    selectedPump = pump;
+    document.getElementById('selectedPumpDisplay').innerText = pump;
+    for(let i = 1; i <= 8; i++){
+        let box = document.getElementById('pumpBox' + i);
+        if(i === pump){
+            box.classList.add('selected');
+        } else {
+            box.classList.remove('selected');
+        }
+    }
+}
+
+function startCalibrate() {
+    fetch(`/start_pump/${selectedPump}`, { method: 'POST' })
+        .catch(err => console.error(err));
+}
+
+function stopCalibrate() {
+    fetch(`/stop_pump/${selectedPump}`, { method: 'POST' })
+        .then(resp => resp.text())
+        .then(seconds => {
+            document.getElementById('calibTime').innerText = seconds;
+        })
+        .catch(err => console.error(err));
+}
+
+function submitCalibration() {
+    const volume = document.getElementById('dispensed_volume').value;
+    if (!volume) {
+        alert('Please enter the dispensed volume (ml)');
+        return;
+    }
+    let formData = new FormData();
+    formData.append('pump_id', selectedPump);
+    formData.append('dispensed_volume', volume);
+    
+    fetch('/calibrate_pump', {
+        method: 'POST',
+        body: formData
+    })
+    .then(resp => {
+        if(resp.redirected){
+            window.location.href = resp.url;
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+function startPrime() {
+    fetch(`/start_prime/${selectedPump}`, { method: 'POST' })
+        .catch(err => console.error(err));
+}
+
+function stopPrime() {
+    fetch(`/stop_prime/${selectedPump}`, { method: 'POST' })
+        .then(resp => resp.text())
+        .then(seconds => {
+            document.getElementById('primeTime').innerText = seconds;
+        })
+        .catch(err => console.error(err));
+}
+
+function submitPrime() {
+    fetch('/prime_hose', {
+        method: 'POST',
+        body: new FormData(new FormDataConstructor(selectedPump))
+    })
+    .then(resp => {
+        if(resp.redirected){
+            window.location.href = resp.url;
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+function FormDataConstructor(pump) {
+    let fd = new FormData();
+    fd.append('pump_id', pump);
+    return fd;
+}
+</script>
+{% endblock %}

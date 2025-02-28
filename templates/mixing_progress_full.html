@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mixing in Progress</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  <style>
+    /* Full-page progress styling */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #121212;
+      color: #F0F0F0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #mixing-container {
+      text-align: center;
+      width: 80%;
+    }
+    /* Custom progress bar container */
+    #progress-container {
+      width: 100%;
+      height: 30px;
+      background: #333;
+      border-radius: 5px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+    /* The actual progress bar with smooth transition */
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(45deg, #70e25a, #5ca044);
+      transition: width 0.5s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="mixing-container">
+    <h2 id="mixing-message">Mixing your drink, please wait!</h2>
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+    <p id="mixing-percentage">0%</p>
+  </div>
+  <script>
+  const socket = io();
+  let currentProgress = 0;   // current progress value (in %)
+  let targetProgress = 0;    // target progress value received from the server
+
+  // This function smoothly interpolates currentProgress toward targetProgress.
+  function animateProgress() {
+    // Use a simple easing: move 10% of the remaining distance per frame.
+    currentProgress += (targetProgress - currentProgress) * 0.1;
+    // If we're very close, snap to target.
+    if (Math.abs(targetProgress - currentProgress) < 0.1) {
+      currentProgress = targetProgress;
+    }
+    document.getElementById('progress-bar').style.width = currentProgress + '%';
+    document.getElementById('mixing-percentage').innerText = Math.round(currentProgress) + '%';
+    // Continue animating if we haven't reached the target.
+    if (currentProgress < targetProgress) {
+      requestAnimationFrame(animateProgress);
+    }
+  }
+
+  socket.on('mixing_progress', function(data) {
+    // Server sends a value between 0 and 1.
+    targetProgress = data.progress * 100;
+    animateProgress();
+  });
+
+  socket.on('mixing_complete', function() {
+    targetProgress = 100;
+    animateProgress();
+    setTimeout(function(){
+      window.location.href = "/";
+    }, 1000);
+  });
+
+  socket.on('mixing_error', function(data) {
+    alert(data.error);
+    window.location.href = "/";
+  });
+</script>
+</body>
+</html>

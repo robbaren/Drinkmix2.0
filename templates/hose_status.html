@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Hose Status Update</h2>
+    <form method="post">
+        {% for i in range(1, 9) %}
+            <label for="hose_{{ i }}">
+                Hose {{ i }} Empty:
+                <input type="checkbox" id="hose_{{ i }}" name="hose_{{ i }}" {% if statuses[i] %}checked{% endif %}>
+                <span class="checkbox-icon"></span>
+            </label><br>
+        {% endfor %}
+        <input type="submit" value="Save" class="button">
+        <a href="{{ url_for('settings') }}" class="button">Back</a>
+    </form>
+{% endblock %}

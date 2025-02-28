@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="settings-page">
+  <h2>Add New Ingredient</h2>
+  <form method="post" style="margin-top: 20px; max-width: 400px; margin: 0 auto;">
+    <label for="ingredient_name">Ingredient Name:</label>
+    <input type="text" name="ingredient_name" id="ingredient_name" placeholder="e.g. Vodka" required>
+    <br><br>
+    <label for="density">Density (optional):</label>
+    <input type="text" name="density" id="density" placeholder="1.0">
+    <br><br>
+    <input type="submit" value="Save" class="button">
+  </form>
+  <div style="margin-top: 20px;">
+    <a href="{{ url_for('list_ingredients') }}" class="button">Back</a>
+  </div>
+</div>
+{% endblock %}

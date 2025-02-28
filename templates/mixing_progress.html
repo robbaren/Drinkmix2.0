@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mixing in Progress</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  <style>
+    /* Simple inline styles for full-page centering; you can move these to your CSS file if desired */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #121212;
+      color: #F0F0F0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #mixing-container {
+      text-align: center;
+      width: 80%;
+    }
+    progress {
+      width: 100%;
+      height: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div id="mixing-container">
+    <h2 id="mixing-message">Mixing your drink, please wait!</h2>
+    <progress id="mixing-progress" value="0" max="100"></progress>
+    <p id="mixing-percentage">0%</p>
+  </div>
+  <script>
+    const socket = io();
+    socket.on('mixing_progress', function(data) {
+      let progress = data.progress * 100;
+      document.getElementById('mixing-progress').value = progress;
+      document.getElementById('mixing-percentage').innerText = Math.round(progress) + '%';
+    });
+    socket.on('mixing_complete', function() {
+      // After a short delay, redirect back to the main page
+      setTimeout(function(){
+          window.location.href = "/";
+      }, 1000);
+    });
+    socket.on('mixing_error', function(data) {
+      alert(data.error);
+      window.location.href = "/";
+    });
+  </script>
+</body>
+</html>

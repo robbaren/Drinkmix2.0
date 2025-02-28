@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block header %}{% endblock %}
+{% block content %}
+  <div id="pin-container" style="position: relative; padding-top: 60px; text-align: center;">
+    <!-- Back button positioned at the top left -->
+    <a href="{{ url_for('main') }}" class="button back-button" 
+       style="position: absolute; top: 10px; left: 10px; padding: 8px 12px; font-size: 16px;">
+      Back
+    </a>
+    <!-- PIN display -->
+    <div id="pin-display" style="font-size: 1.5rem; margin-bottom: 10px;">****</div>
+    <!-- PIN pad grid -->
+    <div id="pin-pad" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 250px; margin: 0 auto;">
+      <button onclick="addDigit(1)" style="padding: 10px; font-size: 18px;">1</button>
+      <button onclick="addDigit(2)" style="padding: 10px; font-size: 18px;">2</button>
+      <button onclick="addDigit(3)" style="padding: 10px; font-size: 18px;">3</button>
+      <button onclick="addDigit(4)" style="padding: 10px; font-size: 18px;">4</button>
+      <button onclick="addDigit(5)" style="padding: 10px; font-size: 18px;">5</button>
+      <button onclick="addDigit(6)" style="padding: 10px; font-size: 18px;">6</button>
+      <button onclick="addDigit(7)" style="padding: 10px; font-size: 18px;">7</button>
+      <button onclick="addDigit(8)" style="padding: 10px; font-size: 18px;">8</button>
+      <button onclick="addDigit(9)" style="padding: 10px; font-size: 18px;">9</button>
+      <button onclick="addDigit(0)" style="padding: 10px; font-size: 18px; grid-column: 2;">0</button>
+      <button onclick="submitPin()" style="padding: 10px; font-size: 18px; grid-column: 1 / -1;">Submit</button>
+    </div>
+    <!-- Hidden form for PIN submission -->
+    <form id="pin-form" method="post" action="{{ url_for('pin_entry') }}" style="display: none;">
+      <input type="hidden" name="pin" id="pin-input">
+    </form>
+  </div>
+{% endblock %}
